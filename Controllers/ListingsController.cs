@@ -7,26 +7,51 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Auctions.Data;
 using Auctions.Models;
+using Auctions.Data.Services;
 
 namespace Auctions.Controllers
 {
     public class ListingsController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IListingsService _listingsService;
 
-        public ListingsController(ApplicationDbContext context)
+        public ListingsController(IListingsService listingsService)
         {
-            _context = context;
+            _listingsService = listingsService;
         }
 
         // GET: Listings
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Listings.Include(l => l.User);
+            var applicationDbContext = _listingsService.GettAll();
             return View(await applicationDbContext.ToListAsync());
         }
+        // GET: Listings/Create
+        public IActionResult Create()
+        {
+            //ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id");
+            return View();
+        }
 
-        // GET: Listings/Details/5
+        // POST: Listings/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create([Bind("Id,Title,Description,Price,ImagePath,IsSold,IdentityUserId")] Listing listing)
+        {
+            if (ModelState.IsValid)
+            {
+             //   _context.Add(listing);
+            //    await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+           // ViewData["IdentityUserId"] = new SelectList(_context.Users, "Id", "Id", listing.IdentityUserId);
+            return View(listing);
+        }
+
+
+        /* // GET: Listings/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -160,5 +185,6 @@ namespace Auctions.Controllers
         {
             return _context.Listings.Any(e => e.Id == id);
         }
+        */
     }
 }
